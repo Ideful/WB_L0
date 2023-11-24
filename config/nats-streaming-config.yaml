@@ -1,4 +1,3 @@
 cluster_id: test-cluster
 client_id: my-unique-client-id
 channel_name: my-unique-channel
-# port: 4223

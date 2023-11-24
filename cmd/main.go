@@ -2,10 +2,7 @@ package main
 
 import (
 	"fmt"
-	"log"
-
-	"github.com/nats-io/stan.go"
-	"github.com/spf13/viper"
+	repository "l0/internal"
 )
 
 // func handleSTANMessage(data []byte) {
@@ -57,46 +54,56 @@ const (
 )
 
 func main() {
-	viper.SetConfigFile("config/nats-streaming-config.yaml")
-	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalf("Error reading config file: %v", err)
-	}
+	// viper.SetConfigFile("config/nats-streaming-config.yaml")
+	// if err := viper.ReadInConfig(); err != nil {
+	// 	log.Fatalf("Error reading config file: %v", err)
+	// }
 
-	clusterID := viper.GetString("cluster_id")
-	clientID := viper.GetString("client_id")
-	channelName := viper.GetString("channel_name")
+	// clusterID := viper.GetString("cluster_id")
+	// clientID := viper.GetString("client_id")
+	// channelName := viper.GetString("channel_name")
 
-	sc, err := stan.Connect(
-		clusterID,
-		clientID,
-		stan.NatsURL("nats://localhost:4222"),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// sc, err := stan.Connect(
+	// 	clusterID,
+	// 	clientID,
+	// 	stan.NatsURL("nats://localhost:4222"),
+	// )
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	defer sc.Close()
+	// defer sc.Close()
 
-	go func() {
-		for {
-			err = sc.Publish(channelName, []byte("Hello, NATS Streaming!"))
-			if err != nil {
-				log.Fatal(err)
-			}
+	// go func() {
+	// 	for {
+	// 		val, err := generator.Generator()
+	// 		if err != nil {
+	// 			log.Println(err)
+	// 		}
 
-			fmt.Println("Message sent successfully!")
-		}
-	}()
+	// 		time.Sleep(50 * time.Millisecond)
+	// 		err = sc.Publish(channelName, val)
+	// 		if err != nil {
+	// 			log.Fatal(err)
+	// 		}
 
-	sub, err := sc.Subscribe(channelName, func(m *stan.Msg) {
-		fmt.Printf("Received a message: %s\n", string(m.Data))
-	}, stan.DurableName("my-durable"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer sub.Close()
+	// 		fmt.Println("Message sent successfully!")
+	// 	}
+	// }()
 
+	// sub, err := sc.Subscribe(channelName, func(m *stan.Msg) {
+	// 	fmt.Printf("Received a message: %s\n", string(m.Data))
+	// }, stan.DurableName("my-durable"))
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// defer sub.Close()
 
-	for {
-	}
+	// for {
+	// }
+
+	db_cfg := repository.InitConfig()
+	repository.CreatePostgresDB(db_cfg)
+
+	fmt.Println(123)
 }
