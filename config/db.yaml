@@ -1,5 +1,5 @@
 Port : "5432"
-Username : "postgres"
+Username : "_user"
 Password : "0"
-DBName : "orders"
-
+DBName : "orders_db"
+SSLMode : "disable"

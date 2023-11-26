@@ -1,11 +1,8 @@
 CREATE DATABASE orders_db;
 CREATE USER _user WITH PASSWORD '0';
-ALTER ROLE _user SET client_encoding TO 'utf8';
-ALTER ROLE _user SET default_transaction_isolation TO 'read committed';
-ALTER ROLE _user SET timezone TO 'UTC';
-GRANT ALL PRIVILEGES ON DATABASE orders_db TO _user;
+\c orders_db;
 
-CREATE TABLE orders (
+CREATE TABLE IF NOT EXISTS orders (
     order_uid VARCHAR(50) PRIMARY KEY,
     track_number VARCHAR(50),
     entry VARCHAR(10),
@@ -19,8 +16,8 @@ CREATE TABLE orders (
     oof_shard VARCHAR(10)
 );
 
-CREATE TABLE delivery_info (
-    order_uid VARCHAR(50) PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS delivery_info (
+    id SERIAL PRIMARY KEY,
     name VARCHAR(100),
     phone VARCHAR(15),
     zip VARCHAR(20),
@@ -30,7 +27,7 @@ CREATE TABLE delivery_info (
     email VARCHAR(255)
 );
 
-CREATE TABLE payment_info (
+CREATE TABLE IF NOT EXISTS payment_info (
     order_uid VARCHAR(50) PRIMARY KEY,
     transaction VARCHAR(50),
     request_id VARCHAR(50),
@@ -44,7 +41,7 @@ CREATE TABLE payment_info (
     custom_fee INTEGER
 );
 
-CREATE TABLE order_items (
+CREATE TABLE IF NOT EXISTS order_items (
     chrt_id INTEGER PRIMARY KEY,
     order_uid VARCHAR(50),
     track_number VARCHAR(50),
@@ -58,3 +55,8 @@ CREATE TABLE order_items (
     brand VARCHAR(100),
     status INTEGER
 );
+GRANT ALL ON TABLE order_items TO _user;
+GRANT ALL ON TABLE payment_info TO _user;
+GRANT ALL ON TABLE delivery_info TO _user;
+GRANT ALL ON TABLE orders TO _user;
+GRANT ALL ON SEQUENCE delivery_info_id_seq TO _user;

@@ -1,8 +1,13 @@
 package main
 
 import (
+	qwe "encoding/json"
 	"fmt"
-	repository "l0/internal"
+	"l0/internal/generator"
+	"l0/internal/models"
+	repository "l0/internal/repository"
+	"log"
+	"time"
 )
 
 // func handleSTANMessage(data []byte) {
@@ -103,7 +108,37 @@ func main() {
 	// }
 
 	db_cfg := repository.InitConfig()
-	repository.CreatePostgresDB(db_cfg)
+	db, err := repository.CreatePostgresDB(db_cfg)
 
-	fmt.Println(123)
+	if err != nil {
+		fmt.Println(err)
+	}
+	var query = `INSERT INTO delivery_info (name, phone, zip, city, address, region,
+				 email) VALUES ($1, $2, $3, $4, $5, $6, $7)`
+	_, err = db.DB.Exec(query, "a", "a", "a", "a", "a", "a", "a")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	for {
+		json, err := generator.Generator()
+		if err != nil {
+			log.Fatal(err)
+		}
+		// fmt.Println(string(json))
+		var order models.Order
+		err = qwe.Unmarshal(json, &order)
+		delivery := order.Delivery
+		// payment := order.Payment
+		// items := order.Items
+
+		fmt.Print(delivery)
+		var query = `INSERT INTO delivery_info (name, phone, zip, city, address, region,
+			email) VALUES ($1, $2, $3, $4, $5, $6, $7)`
+		_, err = db.DB.Exec(query, delivery.Name, delivery.Phone, delivery.Zip, delivery.City, delivery.Address, delivery.Region, delivery.Email)
+
+		time.Sleep(50 * time.Millisecond)
+
+	}
+	// db.Close()
 }

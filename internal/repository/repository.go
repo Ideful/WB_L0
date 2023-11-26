@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
 )
 
@@ -16,12 +17,11 @@ const (
 )
 
 type Config struct {
-	// Host     string `toml:"Host"`
 	Port     string
 	Username string
 	Password string
 	DBName   string
-	// SSLMode  string `toml:"SSLMode"`
+	SSLMode  string
 }
 
 func InitConfig() Config {
@@ -29,16 +29,17 @@ func InitConfig() Config {
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Error reading config file: %v", err)
 	}
-	port := viper.GetString("cluster_id")
-	username := viper.GetString("client_id")
-	password := viper.GetString("channel_name")
+	port := viper.GetString("Port")
+	username := viper.GetString("Username")
+	password := viper.GetString("Password")
 	dbname := viper.GetString("DBName")
-	return Config{port, username, password, dbname}
+	sslmode := viper.GetString("SSLMode")
+	return Config{port, username, password, dbname, sslmode}
 }
 
 func CreatePostgresDB(cfg Config) (*sqlx.DB, error) {
-	db, err := sqlx.Open("postgres", fmt.Sprintf("port=%s user=%s dbname=%s password=%s ", cfg.Port,
-		cfg.Username, cfg.DBName, cfg.Password))
+	db, err := sqlx.Open("postgres", fmt.Sprintf("port=%s user=%s dbname=%s password=%s sslmode=%s", cfg.Port,
+		cfg.Username, cfg.DBName, cfg.Password, cfg.SSLMode))
 	if err != nil {
 		return nil, err
 	}
