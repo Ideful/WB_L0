@@ -1,15 +1,24 @@
+OS := $(shell uname)
 .PHONY: setup_db
 
-all: run-nats run-go
-setup_db:
-	sh ./scripts/db_start.sh
+all: nats go
 
 rm_db:
 	docker stop orders
 	docker rm orders
 
-run-nats:
+nats:
 	nats-streaming-server -sc config/nats-streaming-config.yaml &
 
-run-go:
+stan_stop:
+	sh ./scripts/stan_stop.sh
+
+go:
 	go run cmd/main.go
+
+setup_db:
+ifeq ($(OS), Darwin)  
+	sh ./scripts/db_start_mac.sh
+else ifeq ($(OS), Linux) 
+	sh ./scripts/db_start.sh
+endif
