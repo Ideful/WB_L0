@@ -1,13 +1,13 @@
 package main
 
 import (
-	qwe "encoding/json"
 	"fmt"
 	"l0/internal/generator"
-	"l0/internal/models"
-	repository "l0/internal/repository"
 	"log"
 	"time"
+
+	"github.com/nats-io/stan.go"
+	"github.com/spf13/viper"
 )
 
 // func handleSTANMessage(data []byte) {
@@ -59,86 +59,86 @@ const (
 )
 
 func main() {
-	// viper.SetConfigFile("config/nats-streaming-config.yaml")
-	// if err := viper.ReadInConfig(); err != nil {
-	// 	log.Fatalf("Error reading config file: %v", err)
-	// }
+	viper.SetConfigFile("config/nats-streaming-config.yaml")
+	if err := viper.ReadInConfig(); err != nil {
+		log.Fatalf("Error reading config file: %v", err)
+	}
 
-	// clusterID := viper.GetString("cluster_id")
-	// clientID := viper.GetString("client_id")
-	// channelName := viper.GetString("channel_name")
+	clusterID := viper.GetString("cluster_id")
+	clientID := viper.GetString("client_id")
+	channelName := viper.GetString("channel_name")
 
-	// sc, err := stan.Connect(
-	// 	clusterID,
-	// 	clientID,
-	// 	stan.NatsURL("nats://localhost:4222"),
-	// )
+	sc, err := stan.Connect(
+		clusterID,
+		clientID,
+		stan.NatsURL("nats://localhost:4223"),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer sc.Close()
+
+	go func() {
+		for {
+			val, err := generator.Generator()
+			if err != nil {
+				log.Println(err)
+			}
+			// fmt.Println(string(val))
+
+			time.Sleep(50 * time.Millisecond)
+			if err = sc.Publish(channelName, val); err != nil {
+				log.Fatal(err)
+			}
+
+			// fmt.Println("Message sent successfully!")
+		}
+	}()
+
+	// // for {
+	sub, err := sc.Subscribe(channelName, func(m *stan.Msg) {
+		fmt.Printf("Received a message: %s\n", string(m.Data))
+	}, stan.DurableName("nsame"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer sub.Close()
+
+	// // }
+
+	// db_cfg := repository.InitConfig()
+	// db, err := repository.CreatePostgresDB(db_cfg)
+
 	// if err != nil {
-	// 	log.Fatal(err)
+	// 	fmt.Println(err)
 	// }
-
-	// defer sc.Close()
-
-	// go func() {
-	// 	for {
-	// 		val, err := generator.Generator()
-	// 		if err != nil {
-	// 			log.Println(err)
-	// 		}
-
-	// 		time.Sleep(50 * time.Millisecond)
-	// 		err = sc.Publish(channelName, val)
-	// 		if err != nil {
-	// 			log.Fatal(err)
-	// 		}
-
-	// 		fmt.Println("Message sent successfully!")
-	// 	}
-	// }()
-
-	// sub, err := sc.Subscribe(channelName, func(m *stan.Msg) {
-	// 	fmt.Printf("Received a message: %s\n", string(m.Data))
-	// }, stan.DurableName("my-durable"))
+	// var query = `INSERT INTO delivery_info (name, phone, zip, city, address, region,
+	// 			 email) VALUES ($1, $2, $3, $4, $5, $6, $7)`
+	// _, err = db.DB.Exec(query, "a", "a", "a", "a", "a", "a", "a")
 	// if err != nil {
-	// 	log.Fatal(err)
+	// 	fmt.Println(err)
 	// }
-	// defer sub.Close()
 
 	// for {
+	// 	json, err := generator.Generator()
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// 	// fmt.Println(string(json))
+	// 	var order models.Order
+	// 	err = qwe.Unmarshal(json, &order)
+	// 	delivery := order.Delivery
+	// 	// payment := order.Payment
+	// 	// items := order.Items
+
+	// 	fmt.Print(delivery)
+	// 	var query = `INSERT INTO delivery_info (name, phone, zip, city, address, region,
+	// 		email) VALUES ($1, $2, $3, $4, $5, $6, $7)`
+	// 	_, err = db.DB.Exec(query, delivery.Name, delivery.Phone, delivery.Zip, delivery.City, delivery.Address, delivery.Region, delivery.Email)
+
+	// 	time.Sleep(50 * time.Millisecond)
 	// }
-
-	db_cfg := repository.InitConfig()
-	db, err := repository.CreatePostgresDB(db_cfg)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-	var query = `INSERT INTO delivery_info (name, phone, zip, city, address, region,
-				 email) VALUES ($1, $2, $3, $4, $5, $6, $7)`
-	_, err = db.DB.Exec(query, "a", "a", "a", "a", "a", "a", "a")
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	for {
-		json, err := generator.Generator()
-		if err != nil {
-			log.Fatal(err)
-		}
-		// fmt.Println(string(json))
-		var order models.Order
-		err = qwe.Unmarshal(json, &order)
-		delivery := order.Delivery
-		// payment := order.Payment
-		// items := order.Items
-
-		fmt.Print(delivery)
-		var query = `INSERT INTO delivery_info (name, phone, zip, city, address, region,
-			email) VALUES ($1, $2, $3, $4, $5, $6, $7)`
-		_, err = db.DB.Exec(query, delivery.Name, delivery.Phone, delivery.Zip, delivery.City, delivery.Address, delivery.Region, delivery.Email)
-
-		time.Sleep(50 * time.Millisecond)
-
-	}
 	// db.Close()
+	for {
+	}
 }
