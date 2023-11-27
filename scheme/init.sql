@@ -1,7 +1,7 @@
 CREATE DATABASE orders_db;
 CREATE USER _user WITH PASSWORD '0';
 \c orders_db;
-
+SET datestyle = dmy;
 CREATE TABLE IF NOT EXISTS orders (
     order_uid VARCHAR(50) PRIMARY KEY,
     track_number VARCHAR(50),
@@ -16,8 +16,9 @@ CREATE TABLE IF NOT EXISTS orders (
     oof_shard VARCHAR(10)
 );
 
-CREATE TABLE IF NOT EXISTS delivery_info (
+CREATE TABLE IF NOT EXISTS deliveries (
     id SERIAL PRIMARY KEY,
+    order_id VARCHAR(50),
     name VARCHAR(100),
     phone VARCHAR(15),
     zip VARCHAR(20),
@@ -27,23 +28,25 @@ CREATE TABLE IF NOT EXISTS delivery_info (
     email VARCHAR(255)
 );
 
-CREATE TABLE IF NOT EXISTS payment_info (
-    order_uid VARCHAR(50) PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS payments (
+    id SERIAL PRIMARY KEY,
+    order_id VARCHAR(50),
     transaction VARCHAR(50),
     request_id VARCHAR(50),
     currency VARCHAR(3),
     provider VARCHAR(50),
     amount INTEGER,
-    payment_dt TIMESTAMP,
+    payment_dt INTEGER,
     bank VARCHAR(50),
     delivery_cost INTEGER,
     goods_total INTEGER,
     custom_fee INTEGER
 );
 
-CREATE TABLE IF NOT EXISTS order_items (
-    chrt_id INTEGER PRIMARY KEY,
-    order_uid VARCHAR(50),
+CREATE TABLE IF NOT EXISTS items (
+    id SERIAL PRIMARY KEY,
+    order_id VARCHAR(50),
+    chrt_id INTEGER,
     track_number VARCHAR(50),
     price INTEGER,
     rid VARCHAR(50),
@@ -55,8 +58,11 @@ CREATE TABLE IF NOT EXISTS order_items (
     brand VARCHAR(100),
     status INTEGER
 );
-GRANT ALL ON TABLE order_items TO _user;
-GRANT ALL ON TABLE payment_info TO _user;
-GRANT ALL ON TABLE delivery_info TO _user;
+
+
+
+GRANT ALL ON TABLE items TO _user;
+GRANT ALL ON TABLE payments TO _user;
+GRANT ALL ON TABLE deliveries TO _user;
 GRANT ALL ON TABLE orders TO _user;
-GRANT ALL ON SEQUENCE delivery_info_id_seq TO _user;
+GRANT ALL ON SEQUENCE deliveries_id_seq, payments_id_seq, items_id_seq TO _user;
