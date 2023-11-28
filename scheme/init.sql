@@ -3,7 +3,8 @@ CREATE USER _user WITH PASSWORD '0';
 \c orders_db;
 SET datestyle = dmy;
 CREATE TABLE IF NOT EXISTS orders (
-    order_uid VARCHAR(50) PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
+    order_uid VARCHAR(50),
     track_number VARCHAR(50),
     entry VARCHAR(10),
     locale VARCHAR(5),
@@ -18,7 +19,7 @@ CREATE TABLE IF NOT EXISTS orders (
 
 CREATE TABLE IF NOT EXISTS deliveries (
     id SERIAL PRIMARY KEY,
-    order_id VARCHAR(50),
+    order_id INTEGER,
     name VARCHAR(100),
     phone VARCHAR(15),
     zip VARCHAR(20),
@@ -30,7 +31,7 @@ CREATE TABLE IF NOT EXISTS deliveries (
 
 CREATE TABLE IF NOT EXISTS payments (
     id SERIAL PRIMARY KEY,
-    order_id VARCHAR(50),
+    order_id INTEGER,
     transaction VARCHAR(50),
     request_id VARCHAR(50),
     currency VARCHAR(3),
@@ -45,7 +46,7 @@ CREATE TABLE IF NOT EXISTS payments (
 
 CREATE TABLE IF NOT EXISTS items (
     id SERIAL PRIMARY KEY,
-    order_id VARCHAR(50),
+    order_id INTEGER,
     chrt_id INTEGER,
     track_number VARCHAR(50),
     price INTEGER,
@@ -65,4 +66,4 @@ GRANT ALL ON TABLE items TO _user;
 GRANT ALL ON TABLE payments TO _user;
 GRANT ALL ON TABLE deliveries TO _user;
 GRANT ALL ON TABLE orders TO _user;
-GRANT ALL ON SEQUENCE deliveries_id_seq, payments_id_seq, items_id_seq TO _user;
+GRANT ALL ON SEQUENCE deliveries_id_seq, payments_id_seq, items_id_seq, orders_id_seq TO _user;

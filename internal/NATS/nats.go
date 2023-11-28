@@ -60,13 +60,15 @@ func (st *Stan) Publish() {
 	}
 }
 
+// mb dobavit addtobd
 func (st *Stan) Subscribe(db *repository.MyDB) (stan.Subscription, error) {
 	sub, err := st.Sc.Subscribe(st.Cfg.ChannelName, func(m *stan.Msg) {
-		var order models.Order
+		order := models.Order{}
 		if err := json.Unmarshal(m.Data, &order); err != nil {
 			log.Println(err)
 		}
-		if err := db.ExecQuery(order); err != nil {
+		// fmt.Println(order.Delivery)
+		if err := db.InsertQuery(&order); err != nil {
 			log.Println(err)
 		}
 
