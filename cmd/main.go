@@ -12,13 +12,12 @@ import (
 
 func main() {
 	var st nats.Stan
-	st.InitConfig()
 	if err := st.Connect(); err != nil {
 		log.Fatal(err)
 	}
 	defer st.Disconnect()
 
-	db, err := repository.CreatePostgresDB(repository.InitConfig())
+	db, err := repository.CreatePostgresDB()
 	if err != nil {
 		fmt.Println(err)
 	}

@@ -46,7 +46,8 @@ func InitConfig() Config {
 	return Config{port, username, password, dbname, sslmode}
 }
 
-func CreatePostgresDB(cfg Config) (*MyDB, error) {
+func CreatePostgresDB() (*MyDB, error) {
+	var cfg = InitConfig()
 	var db MyDB
 	var err error
 	db.Db, err = sqlx.Open("postgres", fmt.Sprintf("port=%s user=%s dbname=%s password=%s sslmode=%s", cfg.Port,

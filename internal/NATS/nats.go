@@ -34,6 +34,7 @@ func (st *Stan) InitConfig() {
 }
 
 func (st *Stan) Connect() error {
+	st.InitConfig()
 	var err error
 	st.Sc, err = stan.Connect(
 		st.Cfg.ClusterID,
@@ -44,7 +45,6 @@ func (st *Stan) Connect() error {
 		return err
 	}
 	return nil
-
 }
 
 func (st *Stan) Publish() {
@@ -65,7 +65,6 @@ func (st *Stan) Subscribe(db *repository.MyDB) (stan.Subscription, error) {
 		var order models.Order
 		if err := json.Unmarshal(m.Data, &order); err != nil {
 			log.Println(err)
-
 		}
 		if err := db.ExecQuery(order); err != nil {
 			log.Println(err)
