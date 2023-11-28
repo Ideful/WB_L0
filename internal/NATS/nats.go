@@ -1,7 +1,12 @@
-package models
+package nats
 
 import (
+	"encoding/json"
+	"l0/internal/generator"
+	"l0/internal/models"
+	"l0/internal/repository"
 	"log"
+	"time"
 
 	"github.com/nats-io/stan.go"
 	"github.com/spf13/viper"
@@ -40,6 +45,34 @@ func (st *Stan) Connect() error {
 	}
 	return nil
 
+}
+
+func (st *Stan) Publish() {
+	for {
+		val, err := generator.Generator()
+		if err != nil {
+			log.Println(err)
+		}
+		time.Sleep(50 * time.Millisecond)
+		if err = st.Sc.Publish(st.Cfg.ChannelName, val); err != nil {
+			log.Println(err)
+		}
+	}
+}
+
+func (st *Stan) Subscribe(db *repository.MyDB) (stan.Subscription, error) {
+	sub, err := st.Sc.Subscribe(st.Cfg.ChannelName, func(m *stan.Msg) {
+		var order models.Order
+		if err := json.Unmarshal(m.Data, &order); err != nil {
+			log.Println(err)
+
+		}
+		if err := db.ExecQuery(order); err != nil {
+			log.Println(err)
+		}
+
+	}, stan.DurableName("nsame"))
+	return sub, err
 }
 
 func (st *Stan) Disconnect() {
