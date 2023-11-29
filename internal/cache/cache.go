@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"errors"
+
 	"l0/internal/models"
 	"l0/internal/repository"
 	"sync"
@@ -11,7 +12,7 @@ import (
 type Cache struct {
 	sync.RWMutex
 	orders map[int]models.Order
-	Pod_id int
+	pod_id int
 	i_id   int
 }
 
@@ -20,7 +21,7 @@ func NewCache() *Cache {
 
 	cache := Cache{
 		orders: orders,
-		Pod_id: 1,
+		pod_id: 1,
 		i_id:   1,
 	}
 	return &cache
@@ -30,20 +31,19 @@ func (c *Cache) AddToCache(order *models.Order) {
 	c.Lock()
 	defer c.Unlock()
 
-	order.ID = c.Pod_id
-	order.Delivery.ID = c.Pod_id
-	order.Payment.ID = c.Pod_id
+	order.ID = c.pod_id
+	order.Delivery.ID = c.pod_id
+	order.Payment.ID = c.pod_id
 	for i := range order.Items {
 		order.Items[i].Order_ID = c.i_id
 		c.i_id++
 	}
 
-	c.orders[c.Pod_id] = *order
-	c.Pod_id++
+	c.orders[c.pod_id] = *order
+	c.pod_id++
 }
 
 func (c *Cache) GetFromCache(key int) ([]byte, error) {
-
 	c.RLock()
 	defer c.RUnlock()
 
@@ -65,7 +65,7 @@ func (c *Cache) FillCache(db *repository.MyDB) error {
 	if err != nil {
 		return err
 	}
-	for i := 1; i <= max_id; i++ {
+	for i := 1; i < max_id; i++ {
 		v, err := db.GetOrder(i)
 		if err != nil {
 			return err
@@ -75,6 +75,6 @@ func (c *Cache) FillCache(db *repository.MyDB) error {
 		c.orders[i] = order
 	}
 	c.i_id = (max_id + 1) * 2
-	c.Pod_id = (max_id + 1)
+	c.pod_id = (max_id + 1)
 	return nil
 }

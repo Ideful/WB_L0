@@ -2,6 +2,7 @@ package nats
 
 import (
 	"encoding/json"
+	"fmt"
 	cache "l0/internal/cache"
 	"l0/internal/generator"
 	"l0/internal/models"
@@ -54,7 +55,7 @@ func (st *Stan) Publish() {
 		if err != nil {
 			log.Println(err)
 		}
-		time.Sleep(4000 * time.Millisecond)
+		time.Sleep(400 * time.Millisecond)
 		if err = st.Sc.Publish(st.Cfg.ChannelName, val); err != nil {
 			log.Println(err)
 		}
@@ -65,7 +66,10 @@ func (st *Stan) Subscribe(db *repository.MyDB, c *cache.Cache) (stan.Subscriptio
 	sub, err := st.Sc.Subscribe(st.Cfg.ChannelName, func(m *stan.Msg) {
 		order := models.Order{}
 		if err := json.Unmarshal(m.Data, &order); err != nil {
-			log.Println(err)
+			fmt.Printf("json nvalid %v", err)
+		}
+		if ok := generator.Valid(order); !ok {
+			fmt.Println("order file invalid")
 		}
 		c.AddToCache(&order)
 		if err := db.InsertQuery(&order); err != nil {
