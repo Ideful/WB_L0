@@ -3,19 +3,17 @@ package models
 import "time"
 
 type Delivery struct {
-	ID       int    `db:"id" json:"id"`
-	Order_ID int    `db:"order_id" json:"order_id"`
-	Name     string `json:"name" db:"name"`
-	Phone    string `json:"phone" db:"phone"`
-	Zip      string `json:"zip" db:"zip"`
-	City     string `json:"city" db:"city"`
-	Address  string `json:"address" db:"address"`
-	Region   string `json:"region" db:"region"`
-	Email    string `json:"email" db:"email"`
+	ID      int    `db:"id" json:"id"`
+	Name    string `json:"name" db:"name"`
+	Phone   string `json:"phone" db:"phone"`
+	Zip     string `json:"zip" db:"zip"`
+	City    string `json:"city" db:"city"`
+	Address string `json:"address" db:"address"`
+	Region  string `json:"region" db:"region"`
+	Email   string `json:"email" db:"email"`
 }
 
 type Payment struct {
-	Order_ID     int    `db:"order_id" json:"order_id"`
 	ID           int    `db:"id" json:"id"`
 	Transaction  string `db:"transaction" json:"transaction"`
 	RequestID    string `db:"request_id" json:"request_id"`
@@ -30,8 +28,8 @@ type Payment struct {
 }
 
 type Item struct {
-	Order_ID    int    `db:"order_id" json:"order_id"`
 	ID          int    `db:"id" json:"id"`
+	Order_ID    int    `db:"order_id" json:"order_id"`
 	ChrtID      int    `db:"chrt_id" json:"chrt_id"`
 	TrackNumber string `db:"track_number" json:"track_number"`
 	Price       int    `db:"price" json:"price"`

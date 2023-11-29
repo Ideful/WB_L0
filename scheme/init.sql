@@ -19,7 +19,6 @@ CREATE TABLE IF NOT EXISTS orders (
 
 CREATE TABLE IF NOT EXISTS deliveries (
     id SERIAL PRIMARY KEY,
-    order_id INTEGER,
     name VARCHAR(100),
     phone VARCHAR(15),
     zip VARCHAR(20),
@@ -31,7 +30,6 @@ CREATE TABLE IF NOT EXISTS deliveries (
 
 CREATE TABLE IF NOT EXISTS payments (
     id SERIAL PRIMARY KEY,
-    order_id INTEGER,
     transaction VARCHAR(50),
     request_id VARCHAR(50),
     currency VARCHAR(3),

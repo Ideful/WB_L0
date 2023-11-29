@@ -88,9 +88,9 @@ func (db MyDB) orders_insert(o *models.Order) error {
 }
 
 func (db MyDB) deliveries_insert(o *models.Order) error {
-	query := `INSERT INTO deliveries (order_id, name, phone, zip, city, address, region,
-		email) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
-	if _, err := db.Db.DB.Exec(query, o.ID, o.Delivery.Name, o.Delivery.Phone, o.Delivery.Zip,
+	query := `INSERT INTO deliveries (name, phone, zip, city, address, region,
+		email) VALUES ($1, $2, $3, $4, $5, $6, $7)`
+	if _, err := db.Db.DB.Exec(query, o.Delivery.Name, o.Delivery.Phone, o.Delivery.Zip,
 		o.Delivery.City, o.Delivery.Address, o.Delivery.Region, o.Delivery.Email); err != nil {
 		return err
 	}
@@ -98,9 +98,9 @@ func (db MyDB) deliveries_insert(o *models.Order) error {
 }
 
 func (db MyDB) payments_insert(o *models.Order) error {
-	query := `INSERT INTO payments (order_id, transaction, request_id, currency, provider, amount, payment_dt,
-		bank,delivery_cost,goods_total,custom_fee) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`
-	if _, err := db.Db.DB.Exec(query, o.ID, o.Payment.Transaction, o.Payment.RequestID, o.Payment.Currency, o.Payment.Provider, o.Payment.Amount, o.Payment.PaymentDt,
+	query := `INSERT INTO payments (transaction, request_id, currency, provider, amount, payment_dt,
+		bank,delivery_cost,goods_total,custom_fee) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
+	if _, err := db.Db.DB.Exec(query, o.Payment.Transaction, o.Payment.RequestID, o.Payment.Currency, o.Payment.Provider, o.Payment.Amount, o.Payment.PaymentDt,
 		o.Payment.Bank, o.Payment.DeliveryCost, o.Payment.GoodsTotal, o.Payment.CustomFee); err != nil {
 		return err
 	}
@@ -128,13 +128,13 @@ func (db *MyDB) GetOrder(id int) ([]byte, error) {
 		return nil, err
 	}
 
-	query = `SELECT * FROM deliveries WHERE order_id = $1`
+	query = `SELECT * FROM deliveries WHERE id = $1`
 	err = db.Db.Get(&o.Delivery, query, id)
 	if err != nil {
 		return nil, err
 	}
 
-	query = `SELECT * FROM payments WHERE order_id = $1`
+	query = `SELECT * FROM payments WHERE id = $1`
 	err = db.Db.Get(&o.Payment, query, id)
 	if err != nil {
 		return nil, err
@@ -148,4 +148,14 @@ func (db *MyDB) GetOrder(id int) ([]byte, error) {
 	jsonBytes, err := json.MarshalIndent(o, "", "	")
 
 	return jsonBytes, err
+}
+
+func (db *MyDB) GetOrdersAmount() (int, error) {
+	var id int
+	query := `SELECT COUNT (*) FROM orders`
+	err := db.Db.Get(&id, query)
+	if err != nil {
+		return -1, err
+	}
+	return id, err
 }

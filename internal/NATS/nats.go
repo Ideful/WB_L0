@@ -2,6 +2,7 @@ package nats
 
 import (
 	"encoding/json"
+	cache "l0/internal/cache"
 	"l0/internal/generator"
 	"l0/internal/models"
 	"l0/internal/repository"
@@ -53,21 +54,20 @@ func (st *Stan) Publish() {
 		if err != nil {
 			log.Println(err)
 		}
-		time.Sleep(50 * time.Millisecond)
+		time.Sleep(4000 * time.Millisecond)
 		if err = st.Sc.Publish(st.Cfg.ChannelName, val); err != nil {
 			log.Println(err)
 		}
 	}
 }
 
-// mb dobavit addtobd
-func (st *Stan) Subscribe(db *repository.MyDB) (stan.Subscription, error) {
+func (st *Stan) Subscribe(db *repository.MyDB, c *cache.Cache) (stan.Subscription, error) {
 	sub, err := st.Sc.Subscribe(st.Cfg.ChannelName, func(m *stan.Msg) {
 		order := models.Order{}
 		if err := json.Unmarshal(m.Data, &order); err != nil {
 			log.Println(err)
 		}
-		// fmt.Println(order.Delivery)
+		c.AddToCache(&order)
 		if err := db.InsertQuery(&order); err != nil {
 			log.Println(err)
 		}
