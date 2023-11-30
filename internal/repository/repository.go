@@ -3,7 +3,7 @@ package repository
 import (
 	"encoding/json"
 	"fmt"
-	models "l0/internal/models"
+	"l0/internal/models"
 	"log"
 
 	"github.com/jmoiron/sqlx"

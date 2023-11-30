@@ -4,8 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	cache "l0/internal/cache"
-	"l0/internal/generator"
-	"l0/internal/models"
+	models "l0/internal/models"
 	"l0/internal/repository"
 	"log"
 	"time"
@@ -23,6 +22,26 @@ type Config struct {
 type Stan struct {
 	Sc  stan.Conn
 	Cfg Config
+}
+
+type Publisher struct {
+	publisher *Stan
+}
+
+func NewPublisher(s *Stan) *Publisher {
+	return &Publisher{
+		publisher: s,
+	}
+}
+
+type Subscriber struct {
+	subscriber *Stan
+}
+
+func NewSubscriber(s *Stan) *Subscriber {
+	return &Subscriber{
+		subscriber: s,
+	}
 }
 
 func (st *Stan) InitConfig() {
@@ -49,26 +68,26 @@ func (st *Stan) Connect() error {
 	return nil
 }
 
-func (st *Stan) Publish() {
+func (p *Publisher) Publish() {
 	for {
-		val, err := generator.Generator()
+		val, err := models.Generator()
 		if err != nil {
 			log.Println(err)
 		}
-		time.Sleep(400 * time.Millisecond)
-		if err = st.Sc.Publish(st.Cfg.ChannelName, val); err != nil {
+		if err = p.publisher.Sc.Publish(p.publisher.Cfg.ChannelName, val); err != nil {
 			log.Println(err)
 		}
+		time.Sleep(20 * time.Millisecond)
 	}
 }
 
-func (st *Stan) Subscribe(db *repository.MyDB, c *cache.Cache) (stan.Subscription, error) {
-	sub, err := st.Sc.Subscribe(st.Cfg.ChannelName, func(m *stan.Msg) {
+func (s *Subscriber) Subscribe(db *repository.MyDB, c *cache.Cache) (stan.Subscription, error) {
+	sub, err := s.subscriber.Sc.Subscribe(s.subscriber.Cfg.ChannelName, func(m *stan.Msg) {
 		order := models.Order{}
 		if err := json.Unmarshal(m.Data, &order); err != nil {
 			fmt.Printf("json nvalid %v", err)
 		}
-		if ok := generator.Valid(order); !ok {
+		if ok := models.Valid(order); !ok {
 			fmt.Println("order file invalid")
 		}
 		c.AddToCache(&order)
@@ -76,7 +95,7 @@ func (st *Stan) Subscribe(db *repository.MyDB, c *cache.Cache) (stan.Subscriptio
 			log.Println(err)
 		}
 
-	}, stan.DurableName("nsame"))
+	}, stan.DurableName("test"))
 	return sub, err
 }
 

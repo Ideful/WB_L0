@@ -27,3 +27,8 @@ stan_stop:
 go:
 	go run cmd/main.go
 
+vegeta:
+	vegeta attack -targets=./scripts/attack-targets.txt -rate=50 -duration=40s | tee results.bin | vegeta report
+
+test: 
+	go test a_test.go

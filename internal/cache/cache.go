@@ -3,7 +3,7 @@ package models
 import (
 	"encoding/json"
 	"errors"
-
+	"fmt"
 	"l0/internal/models"
 	"l0/internal/repository"
 	"sync"
@@ -18,7 +18,6 @@ type Cache struct {
 
 func NewCache() *Cache {
 	orders := make(map[int]models.Order)
-
 	cache := Cache{
 		orders: orders,
 		pod_id: 1,
@@ -35,10 +34,11 @@ func (c *Cache) AddToCache(order *models.Order) {
 	order.Delivery.ID = c.pod_id
 	order.Payment.ID = c.pod_id
 	for i := range order.Items {
-		order.Items[i].Order_ID = c.i_id
+		order.Items[i].Order_ID = c.pod_id
+		order.Items[i].ID = c.i_id
 		c.i_id++
 	}
-
+	fmt.Println(c.i_id, c.pod_id)
 	c.orders[c.pod_id] = *order
 	c.pod_id++
 }
@@ -74,7 +74,7 @@ func (c *Cache) FillCache(db *repository.MyDB) error {
 		json.Unmarshal(v, &order)
 		c.orders[i] = order
 	}
-	c.i_id = (max_id + 1) * 2
+	c.i_id = max_id*2 + 1
 	c.pod_id = (max_id + 1)
 	return nil
 }

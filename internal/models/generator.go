@@ -1,11 +1,9 @@
-package generator
+package models
 
 import (
 	"encoding/json"
 	"fmt"
-	"l0/internal/models"
 	"math/rand"
-	"regexp"
 	"time"
 )
 
@@ -31,8 +29,8 @@ func randomEmail() string {
 	return randomString(15)
 }
 
-func randomDelivery() models.Delivery {
-	return models.Delivery{
+func randomDelivery() Delivery {
+	return Delivery{
 		Name:    randomString(8),
 		Phone:   fmt.Sprintf("+7999054%d", rand.Intn(10000)),
 		Zip:     fmt.Sprintf("%05d", rand.Intn(100000)),
@@ -43,8 +41,8 @@ func randomDelivery() models.Delivery {
 	}
 }
 
-func randomPayment() models.Payment {
-	return models.Payment{
+func randomPayment() Payment {
+	return Payment{
 		Transaction:  randomString(12),
 		RequestID:    randomString(10),
 		Currency:     "RUB",
@@ -58,9 +56,9 @@ func randomPayment() models.Payment {
 	}
 }
 
-func randomItem() []models.Item {
+func randomItem() []Item {
 	len := rand.Intn(4) + 1
-	a := make([]models.Item, len)
+	a := make([]Item, len)
 	for i := 0; i < len; i++ {
 		a[i].ChrtID = rand.Intn(100)
 		a[i].TrackNumber = randomString(8)
@@ -76,8 +74,8 @@ func randomItem() []models.Item {
 	}
 	return a
 }
-func randomOrder() models.Order {
-	return models.Order{
+func randomOrder() Order {
+	return Order{
 		OrderUID:          randomString(16),
 		TrackNumber:       randomString(10),
 		Entry:             randomString(5),
@@ -93,24 +91,4 @@ func randomOrder() models.Order {
 		DateCreated:       time.Now(),
 		OOFShard:          randomString(6),
 	}
-}
-
-func Valid(o models.Order) bool {
-	d := o.Delivery
-
-	if len(d.Phone) != 12 {
-		return false
-	}
-	if !isValidEmail(d.Email) {
-		return false
-	}
-	return true
-}
-
-func isValidEmail(email string) bool {
-	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
-	if emailRegex.MatchString(email) {
-		return true
-	}
-	return false
 }

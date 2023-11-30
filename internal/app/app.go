@@ -45,36 +45,39 @@ func orders(w http.ResponseWriter, r *http.Request, db *repository.MyDB, cache *
 }
 
 func Run() {
-	var st nats.Stan
+	var st nats.Stan // соединяемся с nats-streaming
 	if err := st.Connect(); err != nil {
 		log.Fatal(err)
 	}
-	go st.Publish()
 	defer st.Disconnect()
 
-	db, err := repository.CreatePostgresDB()
+	publisher := nats.NewPublisher(&st) // создаем сущность публикующего
+	go publisher.Publish()              // публикуем данные в канал
+
+	db, err := repository.CreatePostgresDB() // создаем и соединяемся с БД
 	if err != nil {
 		fmt.Println(err)
 	}
 	defer db.Db.Close()
 
-	cache := cache.NewCache()
-	err = cache.FillCache(db)
+	cache := cache.NewCache() // создаем кэш
+	err = cache.FillCache(db) // заполняем данными из БД
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	sub, err := st.Subscribe(db, cache)
+	subscriber := nats.NewSubscriber(&st)       // создаем подписчика
+	sub, err := subscriber.Subscribe(db, cache) // делаем подписку, а также внутри обновляем БД и кэш
 	if err != nil {
 		fmt.Println(err)
 	}
 	defer sub.Close()
 
-	s := new(models.Server)
+	s := new(models.Server) // делаем сервер и хэндлим запросы
 	http.HandleFunc("/orders/",
 		func(w http.ResponseWriter, r *http.Request) {
 			orders(w, r, db, cache)
 		})
 
-	s.Run("8080")
+	s.Run("8080") // запускаем сервер
 }
