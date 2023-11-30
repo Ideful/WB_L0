@@ -3,7 +3,6 @@ package models
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"l0/internal/models"
 	"l0/internal/repository"
 	"sync"
@@ -38,7 +37,6 @@ func (c *Cache) AddToCache(order *models.Order) {
 		order.Items[i].ID = c.i_id
 		c.i_id++
 	}
-	fmt.Println(c.i_id, c.pod_id)
 	c.orders[c.pod_id] = *order
 	c.pod_id++
 }
